@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "WeirdHost Presence Bridge",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "WeirdHost 페이지 상태를 WeirdHost Presence 앱에 전달합니다.",
   "permissions": ["tabs", "storage"],
   "host_permissions": [

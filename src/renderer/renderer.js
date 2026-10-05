@@ -1,6 +1,18 @@
 const sectionNames = {
-  dashboard: '대시보드', console: '콘솔', files: '파일 관리', settings: '설정', backups: '백업',
-  startup: '시작 설정', schedules: '스케줄', users: '사용자', plugins: '플러그인', network: '네트워크', other: '기타'
+  console: '콘솔',
+  files: '파일 관리',
+  databases: '데이터베이스',
+  subdomain: '도메인 관리',
+  schedules: '일정',
+  users: '유저',
+  backups: '백업',
+  network: '네트워크',
+  startup: '서버 시작 설정',
+  settings: '위어드호스트 설정',
+  activity: '활동',
+  properties: '서버 설정',
+  playermanager: '플레이어 관리',
+  other: '기타'
 };
 
 let currentState = null;

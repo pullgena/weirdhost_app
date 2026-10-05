@@ -1,18 +1,25 @@
 (() => {
-  const SECTION_RULES = [
-    ['console', [/\/console(?:\/|$)/i, /콘솔/i, /console/i]],
-    ['files', [/\/files?(?:\/|$)/i, /파일\s*관리/i, /file\s*manager/i]],
-    ['settings', [/\/settings?(?:\/|$)/i, /서버\s*설정/i, /settings?/i]],
-    ['backups', [/\/backups?(?:\/|$)/i, /백업/i, /backups?/i]],
-    ['startup', [/\/startup(?:\/|$)/i, /시작\s*설정/i, /startup/i]],
-    ['schedules', [/\/schedules?(?:\/|$)/i, /스케줄/i, /schedules?/i]],
-    ['users', [/\/users?(?:\/|$)/i, /사용자\s*관리/i, /users?/i]],
-    ['plugins', [/\/plugins?(?:\/|$)/i, /플러그인/i, /plugins?/i]],
-    ['network', [/\/network(?:\/|$)/i, /네트워크/i, /network/i]],
-    ['dashboard', [/\/dashboard(?:\/|$)/i, /대시보드/i, /dashboard/i]]
+  // WeirdHost의 탭은 화면 글자가 아니라 URL 경로로 판별합니다.
+  // /server/<고유코드>/ 자체가 콘솔이고, 나머지는 아래 경로를 사용합니다.
+  const ROUTES = [
+    ['files', 'files'],
+    ['databases', 'databases'],
+    ['subdomain', 'subdomain'],
+    ['schedules', 'schedules'],
+    ['users', 'users'],
+    ['backups', 'backups'],
+    ['network', 'network'],
+    ['startup', 'startup'],
+    ['settings', 'settings'],
+    ['activity', 'activity'],
+    ['properties', 'properties'],
+    ['playermanager', 'playermanager']
   ];
 
-  const GENERIC = new Set(['weirdhost', 'weirdhost panel', '위어드호스트', '대시보드', 'dashboard', 'console', '콘솔', 'files', '파일 관리', 'settings', '설정']);
+  const GENERIC = new Set([
+    'weirdhost', 'weirdhost panel', '위어드호스트', '대시보드', 'dashboard',
+    'console', '콘솔', 'files', '파일 관리', 'settings', '설정'
+  ]);
 
   function clean(text) {
     return String(text || '').replace(/\s+/g, ' ').trim();
@@ -22,7 +29,7 @@
     const s = clean(text);
     if (!s || s.length < 2 || s.length > 80) return false;
     if (GENERIC.has(s.toLowerCase())) return false;
-    if (/^(콘솔|파일|설정|백업|스케줄|네트워크|플러그인|사용자)/i.test(s)) return false;
+    if (/^(콘솔|파일|설정|백업|일정|네트워크|유저|데이터베이스|도메인|활동|플레이어)/i.test(s)) return false;
     return true;
   }
 
@@ -45,9 +52,19 @@
   }
 
   function detectSection() {
-    const haystack = `${location.pathname} ${document.title} ${clean(document.querySelector('main h1, main h2, h1')?.textContent)}`;
-    for (const [key, rules] of SECTION_RULES) {
-      if (rules.some((r) => r.test(haystack))) return key;
+    let pathname = '';
+    try { pathname = new URL(location.href).pathname; } catch { pathname = location.pathname || ''; }
+    pathname = pathname.replace(/\/{2,}/g, '/');
+
+    // 정확히 /server/<고유코드>/ 이면 콘솔입니다.
+    if (/^\/server\/[^/]+\/?$/i.test(pathname)) return 'console';
+
+    const match = pathname.match(/^\/server\/[^/]+\/([^/]+)(?:\/|$)/i);
+    if (!match) return 'other';
+    const segment = String(match[1] || '').toLowerCase();
+
+    for (const [key, route] of ROUTES) {
+      if (segment === route) return key;
     }
     return 'other';
   }
@@ -72,7 +89,7 @@
     if (msg?.kind === 'WEIRDHOST_REQUEST_STATE') send();
   });
 
-  let timer = setInterval(send, 4000);
+  setInterval(send, 4000);
   const observer = new MutationObserver(() => {
     clearTimeout(window.__weirdhostPresenceDebounce);
     window.__weirdhostPresenceDebounce = setTimeout(send, 350);

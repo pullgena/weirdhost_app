@@ -13,24 +13,28 @@ const DEFAULTS = {
   stateTemplate: '{section}',
   fallbackServerText: 'WeirdHost 서버',
   sectionLabels: {
-    dashboard: '대시보드 확인 중',
     console: '콘솔 확인 중',
     files: '파일 관리 중',
-    settings: '서버 설정 확인 중',
+    databases: '데이터베이스 관리 중',
+    subdomain: '도메인 관리 중',
+    schedules: '일정 관리 중',
+    users: '유저 관리 중',
     backups: '백업 관리 중',
-    startup: '시작 설정 확인 중',
-    schedules: '스케줄 관리 중',
-    users: '사용자 관리 중',
-    plugins: '플러그인 관리 중',
-    network: '네트워크 설정 확인 중',
+    network: '네트워크 관리 중',
+    startup: '서버 시작 설정 확인 중',
+    settings: '위어드호스트 설정 확인 중',
+    activity: '활동 확인 중',
+    properties: '서버 설정 확인 중',
+    playermanager: '플레이어 관리 중',
     other: '서버 관리 중'
   },
+
   largeImageKey: '',
   largeImageText: 'weirdhost',
   autoUpdate: true,
   bridgePort: 32145,
   staleAfterMs: 15000,
-  settingsSchemaVersion: 2
+  settingsSchemaVersion: 3
 };
 
 function deepMerge(base, override) {
@@ -61,9 +65,9 @@ class SettingsStore {
       const parsed = JSON.parse(raw);
       const merged = deepMerge(DEFAULTS, parsed);
 
-      // v0.1.3 기본 Discord 표시 형식으로 1회 마이그레이션합니다.
+      // v0.1.4 기본 Discord 표시 형식과 WeirdHost URL 탭 구성을 마이그레이션합니다.
       // 사용자가 직접 바꾼 템플릿은 건드리지 않습니다.
-      if (Number(parsed.settingsSchemaVersion || 1) < 2) {
+      if (Number(parsed.settingsSchemaVersion || 1) < 3) {
         if (!parsed.detailsTemplate || parsed.detailsTemplate === '{server}') {
           merged.detailsTemplate = '서버 이름 : {server} 에서';
         }
@@ -73,8 +77,12 @@ class SettingsStore {
         if (!parsed.largeImageText || parsed.largeImageText === 'WeirdHost') {
           merged.largeImageText = 'weirdhost';
         }
+        // v0.1.3의 기본 'settings' 문구는 이제 /settings(위어드호스트 설정)에 맞춥니다.
+        if (!parsed.sectionLabels?.settings || parsed.sectionLabels.settings === '서버 설정 확인 중') {
+          merged.sectionLabels.settings = '위어드호스트 설정 확인 중';
+        }
         merged.activityType = 3;
-        merged.settingsSchemaVersion = 2;
+        merged.settingsSchemaVersion = 3;
         try {
           fs.mkdirSync(path.dirname(this.file), { recursive: true });
           fs.writeFileSync(this.file, JSON.stringify(merged, null, 2), 'utf8');

@@ -139,3 +139,11 @@ weirdhost 시청 중
 ```
 
 기본 템플릿은 `서버 이름 : {server} 에서` / `{section}`이며 앱의 고급 설정에서 변경할 수 있습니다.
+
+
+## v0.1.4 WeirdHost 메뉴 URL 감지
+
+현재 메뉴는 화면 글자가 아니라 `hub.weirdhost.xyz/server/<서버코드>/...` URL 경로로 판별합니다.
+콘솔은 `/server/<서버코드>/` 루트이며, 파일 관리(`/files`), 데이터베이스(`/databases`), 도메인 관리(`/subdomain`), 일정(`/schedules`), 유저(`/users`), 백업(`/backups`), 네트워크(`/network`), 서버 시작 설정(`/startup`), 위어드호스트 설정(`/settings`), 활동(`/activity`), 서버 설정(`/properties`), 플레이어 관리(`/playermanager`)를 지원합니다.
+
+> v0.1.4부터 탭 감지 로직이 확장프로그램에 포함되므로 기존 사용자는 확장프로그램도 새 `extension` 폴더로 다시 로드해야 합니다.
