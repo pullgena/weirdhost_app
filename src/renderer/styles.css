@@ -120,3 +120,14 @@ input[type="checkbox"] { width:18px; height:18px; accent-color:var(--accent); }
 .status-pill.waiting { border-color:rgba(250,166,26,.4); color:#ffc56b; background:rgba(250,166,26,.08); }
 .status-pill.error { border-color:rgba(240,93,111,.5); color:#ff9eaa; background:rgba(240,93,111,.09); }
 .status-pill.off { color:#b1b8ca; }
+
+.fake-avatar {
+  overflow: hidden;
+  background: #000;
+}
+.fake-avatar img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}

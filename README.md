@@ -1,4 +1,4 @@
-# WeirdHost Presence
+# weirdhost Presence
 
 WeirdHost 웹 패널에서 현재 보고 있는 서버와 메뉴를 Discord Rich Presence로 표시하는 Windows 앱 + Chrome/Edge/Brave 확장프로그램입니다.
 
@@ -134,11 +134,11 @@ Discord Developer Portal의 애플리케이션 이름은 `weirdhost`로 설정�
 
 ```text
 weirdhost 시청 중
-서버 이름 : [서버 이름] 에서
+[서버 이름]
 [탭 현황]
 ```
 
-기본 템플릿은 `서버 이름 : {server} 에서` / `{section}`이며 앱의 고급 설정에서 변경할 수 있습니다.
+기본 템플릿은 `{server}` / `{section}`이며 앱의 고급 설정에서 변경할 수 있습니다.
 
 
 ## v0.1.4 WeirdHost 메뉴 URL 감지
@@ -147,3 +147,21 @@ weirdhost 시청 중
 콘솔은 `/server/<서버코드>/` 루트이며, 파일 관리(`/files`), 데이터베이스(`/databases`), 도메인 관리(`/subdomain`), 일정(`/schedules`), 유저(`/users`), 백업(`/backups`), 네트워크(`/network`), 서버 시작 설정(`/startup`), 위어드호스트 설정(`/settings`), 활동(`/activity`), 서버 설정(`/properties`), 플레이어 관리(`/playermanager`)를 지원합니다.
 
 > v0.1.4부터 탭 감지 로직이 확장프로그램에 포함되므로 기존 사용자는 확장프로그램도 새 `extension` 폴더로 다시 로드해야 합니다.
+
+
+## v0.1.5 표시 형식 / 아이콘
+
+기본 Discord 표시 형식은 다시 간단하게 변경했습니다.
+
+```text
+weirdhost 시청 중
+<서버 이름>
+<현재 메뉴>
+```
+
+활동 종류를 바꾸면 `weirdhost 플레이 중`, `weirdhost 듣는 중`, `weirdhost 경쟁 중`으로 표시됩니다.
+Discord에서 `weirdhost`라는 이름은 Discord Developer Portal의 애플리케이션 이름을 사용합니다.
+
+Windows 앱, 트레이, 설치 프로그램, 브라우저 확장프로그램 아이콘은 프로젝트에 포함된 `build/icon.png` / `build/icon.ico`와 동일한 로고를 사용합니다.
+
+Discord 활동 카드의 큰 이미지까지 같은 로고로 표시하려면 Discord Developer Portal의 Rich Presence 자산에 이 이미지를 등록하고, 앱 고급 설정의 `Discord 큰 이미지 키`에 해당 자산 키를 입력해야 합니다.

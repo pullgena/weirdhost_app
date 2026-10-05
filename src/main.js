@@ -20,12 +20,9 @@ let discordState = { connected: false, message: '연결 대기 중', level: 'wai
 let bridgeState = { listening: false, message: '브리지 시작 대기 중' };
 
 function trayIcon() {
-  const svg = `
-    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
-      <rect width="32" height="32" rx="8" fill="#5865F2"/>
-      <path fill="#fff" d="M8 10h5l3 8 3-8h5l-6 13h-4z"/>
-    </svg>`;
-  return nativeImage.createFromDataURL(`data:image/svg+xml;base64,${Buffer.from(svg).toString('base64')}`);
+  const iconPath = path.join(__dirname, 'assets', 'icon.png');
+  const image = nativeImage.createFromPath(iconPath);
+  return image.isEmpty() ? nativeImage.createEmpty() : image.resize({ width: 24, height: 24 });
 }
 
 function createWindow() {
@@ -35,7 +32,8 @@ function createWindow() {
     minWidth: 760,
     minHeight: 620,
     show: false,
-    title: 'WeirdHost Presence',
+    title: 'weirdhost Presence',
+    icon: path.join(__dirname, 'assets', 'icon.png'),
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
@@ -54,7 +52,7 @@ function createWindow() {
 
 function createTray() {
   tray = new Tray(trayIcon());
-  tray.setToolTip('WeirdHost Presence');
+  tray.setToolTip('weirdhost Presence');
   tray.on('double-click', showWindow);
   refreshTrayMenu();
 }
@@ -69,7 +67,7 @@ function refreshTrayMenu() {
   if (!tray || !store) return;
   const settings = store.get();
   const menu = Menu.buildFromTemplate([
-    { label: 'WeirdHost Presence 열기', click: showWindow },
+    { label: 'weirdhost Presence 열기', click: showWindow },
     { type: 'separator' },
     {
       label: settings.enabled ? 'Presence 정지' : 'Presence 시작',
@@ -101,9 +99,9 @@ function applyTemplate(template, vars) {
 
 function buildActivity(page, settings) {
   const server = settings.showServerName
-    ? (page.serverName || settings.fallbackServerText || 'WeirdHost 서버')
-    : (settings.fallbackServerText || 'WeirdHost 서버');
-  const section = settings.showSection ? sectionText(page.section, settings) : 'WeirdHost 이용 중';
+    ? (page.serverName || settings.fallbackServerText || 'weirdhost 서버')
+    : (settings.fallbackServerText || 'weirdhost 서버');
+  const section = settings.showSection ? sectionText(page.section, settings) : 'weirdhost 이용 중';
   const details = applyTemplate(settings.detailsTemplate, { server, section, host: page.host || '', title: page.title || '' });
   const state = applyTemplate(settings.stateTemplate, { server, section, host: page.host || '', title: page.title || '' });
 
@@ -242,7 +240,7 @@ function setupUpdater() {
   });
   autoUpdater.on('update-downloaded', (info) => {
     updaterState = { status: 'ready', version: info.version, progress: 100, message: '업데이트 준비 완료. 재시작하면 적용됩니다.' };
-    if (Notification.isSupported()) new Notification({ title: 'WeirdHost Presence', body: '새 업데이트가 준비되었습니다.' }).show();
+    if (Notification.isSupported()) new Notification({ title: 'weirdhost Presence', body: '새 업데이트가 준비되었습니다.' }).show();
     broadcastState();
   });
   autoUpdater.on('error', (error) => {

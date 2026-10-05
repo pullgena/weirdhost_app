@@ -9,9 +9,9 @@ const DEFAULTS = {
   showServerName: true,
   showSection: true,
   showElapsedTime: true,
-  detailsTemplate: '서버 이름 : {server} 에서',
+  detailsTemplate: '{server}',
   stateTemplate: '{section}',
-  fallbackServerText: 'WeirdHost 서버',
+  fallbackServerText: 'weirdhost 서버',
   sectionLabels: {
     console: '콘솔 확인 중',
     files: '파일 관리 중',
@@ -34,7 +34,7 @@ const DEFAULTS = {
   autoUpdate: true,
   bridgePort: 32145,
   staleAfterMs: 15000,
-  settingsSchemaVersion: 3
+  settingsSchemaVersion: 4
 };
 
 function deepMerge(base, override) {
@@ -65,11 +65,15 @@ class SettingsStore {
       const parsed = JSON.parse(raw);
       const merged = deepMerge(DEFAULTS, parsed);
 
-      // v0.1.4 기본 Discord 표시 형식과 WeirdHost URL 탭 구성을 마이그레이션합니다.
+      // v0.1.5 기본 Discord 표시 형식과 아이콘 구성을 마이그레이션합니다.
       // 사용자가 직접 바꾼 템플릿은 건드리지 않습니다.
-      if (Number(parsed.settingsSchemaVersion || 1) < 3) {
-        if (!parsed.detailsTemplate || parsed.detailsTemplate === '{server}') {
-          merged.detailsTemplate = '서버 이름 : {server} 에서';
+      if (Number(parsed.settingsSchemaVersion || 1) < 4) {
+        if (
+          !parsed.detailsTemplate ||
+          parsed.detailsTemplate === '{server}' ||
+          parsed.detailsTemplate === '서버 이름 : {server} 에서'
+        ) {
+          merged.detailsTemplate = '{server}';
         }
         if (!parsed.stateTemplate || parsed.stateTemplate === '{section}') {
           merged.stateTemplate = '{section}';
@@ -82,7 +86,7 @@ class SettingsStore {
           merged.sectionLabels.settings = '위어드호스트 설정 확인 중';
         }
         merged.activityType = 3;
-        merged.settingsSchemaVersion = 3;
+        merged.settingsSchemaVersion = 4;
         try {
           fs.mkdirSync(path.dirname(this.file), { recursive: true });
           fs.writeFileSync(this.file, JSON.stringify(merged, null, 2), 'utf8');

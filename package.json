@@ -1,6 +1,6 @@
 {
   "name": "weirdhost-presence",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Discord Rich Presence companion for Weirdhost",
   "main": "src/main.js",
   "author": "pullgena",
@@ -41,10 +41,13 @@
       "target": [
         {
           "target": "nsis",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         }
       ],
-      "artifactName": "WeirdHost-Presence-Setup-${version}.${ext}"
+      "artifactName": "WeirdHost-Presence-Setup-${version}.${ext}",
+      "icon": "build/icon.ico"
     },
     "nsis": {
       "oneClick": false,

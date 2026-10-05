@@ -92,8 +92,8 @@ function renderPreview(state, useForm = false) {
   const section = (s.sectionLabels || {})[page.section] || s.sectionLabels?.other || '서버 관리 중';
   const server = s.showServerName ? (page.serverName || s.fallbackServerText) : s.fallbackServerText;
   const vars = {
-    server: server || 'WeirdHost 서버',
-    section: s.showSection ? section : 'WeirdHost 이용 중',
+    server: server || 'weirdhost 서버',
+    section: s.showSection ? section : 'weirdhost 이용 중',
     host: page.host || '',
     title: page.title || ''
   };
@@ -204,7 +204,7 @@ function render(state, first = false) {
   );
 
   if (page.active) {
-    const server = page.serverName || state.settings.fallbackServerText || 'WeirdHost 서버';
+    const server = page.serverName || state.settings.fallbackServerText || 'weirdhost 서버';
     const section = sectionNames[page.section] || page.section || '기타';
     setStatusValue('currentPageState', `${server} · ${section}`, 'ok');
   } else {
@@ -234,8 +234,8 @@ function applyRecommendedSettings() {
   $('showSection').checked = true;
   $('showElapsedTime').checked = true;
   $('launchAtStartup').checked = true;
-  $('fallbackServerText').value = 'WeirdHost 서버';
-  $('detailsTemplate').value = '서버 이름 : {server} 에서';
+  $('fallbackServerText').value = 'weirdhost 서버';
+  $('detailsTemplate').value = '{server}';
   $('stateTemplate').value = '{section}';
   if (currentState) renderPreview(currentState, true);
 }
