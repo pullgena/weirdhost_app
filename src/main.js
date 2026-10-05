@@ -106,6 +106,9 @@ function buildActivity(page, settings) {
   const state = applyTemplate(settings.stateTemplate, { server, section, host: page.host || '', title: page.title || '' });
 
   const activity = {
+    // Discord 2026 Social SDK/Rich Presence의 표시 이름 필드.
+    // 레거시 RPC 클라이언트에서 무시될 경우 Developer Portal의 애플리케이션 이름이 사용됩니다.
+    name: 'weirdhost',
     type: Number(settings.activityType),
     details: details || undefined,
     state: state || undefined,
@@ -116,12 +119,8 @@ function buildActivity(page, settings) {
     activity.timestamps = { start: Math.floor(sessionStartedAt / 1000) };
   }
 
-  if (settings.largeImageKey) {
-    activity.assets = {
-      large_image: settings.largeImageKey,
-      large_text: settings.largeImageText || 'weirdhost'
-    };
-  }
+  // 큰 이미지를 별도로 지정하지 않습니다. Discord가 애플리케이션 아이콘을
+  // Rich Presence의 기본 큰 이미지로 사용하도록 둡니다.
 
   return activity;
 }
@@ -328,6 +327,13 @@ function registerIpc() {
       : path.join(__dirname, '..', 'extension');
     await shell.openPath(extensionPath);
     return extensionPath;
+  });
+  ipcMain.handle('app:open-discord-assets-folder', async () => {
+    const assetsPath = app.isPackaged
+      ? path.join(process.resourcesPath, 'discord-assets')
+      : path.join(__dirname, '..', 'discord-assets');
+    await shell.openPath(assetsPath);
+    return assetsPath;
   });
   ipcMain.handle('app:install-update', () => {
     if (updaterState.status === 'ready') autoUpdater.quitAndInstall(false, true);

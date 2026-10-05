@@ -45,8 +45,6 @@ function fillSettings(s) {
   $('showElapsedTime').checked = Boolean(s.showElapsedTime);
   $('launchAtStartup').checked = Boolean(s.launchAtStartup);
   $('autoUpdate').checked = Boolean(s.autoUpdate);
-  $('largeImageKey').value = s.largeImageKey || '';
-  $('largeImageText').value = s.largeImageText || '';
   renderSectionInputs(s.sectionLabels || {});
 }
 
@@ -64,8 +62,6 @@ function collectSettings() {
     showElapsedTime: $('showElapsedTime').checked,
     launchAtStartup: $('launchAtStartup').checked,
     autoUpdate: $('autoUpdate').checked,
-    largeImageKey: $('largeImageKey').value.trim(),
-    largeImageText: $('largeImageText').value.trim(),
     sectionLabels
   };
 }
@@ -271,6 +267,8 @@ async function init() {
   $('quitBtn').addEventListener('click', () => window.weirdhost.quit());
   $('openExtensionBtn').addEventListener('click', () => window.weirdhost.openExtensionFolder());
   $('openDiscordPortalBtn').addEventListener('click', () => window.weirdhost.openDiscordPortal());
+  $('openDiscordAssetsBtn')?.addEventListener('click', () => window.weirdhost.openDiscordAssetsFolder());
+  $('openDiscordPortalBrandingBtn')?.addEventListener('click', () => window.weirdhost.openDiscordPortal());
   $('recommendedBtn').addEventListener('click', applyRecommendedSettings);
   $('checkUpdateBtn').addEventListener('click', async () => {
     await window.weirdhost.checkForUpdates();

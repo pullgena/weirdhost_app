@@ -165,3 +165,14 @@ Discord에서 `weirdhost`라는 이름은 Discord Developer Portal의 애플리�
 Windows 앱, 트레이, 설치 프로그램, 브라우저 확장프로그램 아이콘은 프로젝트에 포함된 `build/icon.png` / `build/icon.ico`와 동일한 로고를 사용합니다.
 
 Discord 활동 카드의 큰 이미지까지 같은 로고로 표시하려면 Discord Developer Portal의 Rich Presence 자산에 이 이미지를 등록하고, 앱 고급 설정의 `Discord 큰 이미지 키`에 해당 자산 키를 입력해야 합니다.
+
+
+## v0.1.6 Discord 카드 이름/큰 이미지
+
+Discord 카드의 맨 위 활동 이름은 `weirdhost`를 사용하도록 활동 payload에도 `name: "weirdhost"`를 넣습니다.
+현재 사용 중인 로컬 RPC에서 이 필드가 무시되는 Discord 클라이언트에서는 Developer Portal의 애플리케이션 이름이 최종 표시 이름이므로 **General Information → Name을 `weirdhost`로 설정**해야 합니다.
+
+큰 이미지는 별도 Rich Presence asset key를 강제하지 않고 **Discord 애플리케이션 아이콘을 기본 이미지로 사용**합니다.
+프로젝트의 `discord-assets/weirdhost.png`가 사용자가 제공한 위어드호스트 로고입니다. Developer Portal의 **General Information → Application Icon**에 이 파일을 업로드하면 Discord 카드의 큰 이미지에도 같은 로고가 기본으로 표시됩니다.
+
+앱의 고급 설정에는 `위어드호스트 아이콘 파일 열기` 버튼과 Developer Portal 바로가기 버튼을 추가했습니다.

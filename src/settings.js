@@ -29,12 +29,13 @@ const DEFAULTS = {
     other: '서버 관리 중'
   },
 
+  // Discord 카드의 큰 이미지는 Developer Portal의 애플리케이션 아이콘을 기본으로 사용합니다.
   largeImageKey: '',
   largeImageText: 'weirdhost',
   autoUpdate: true,
   bridgePort: 32145,
   staleAfterMs: 15000,
-  settingsSchemaVersion: 4
+  settingsSchemaVersion: 5
 };
 
 function deepMerge(base, override) {
@@ -65,9 +66,9 @@ class SettingsStore {
       const parsed = JSON.parse(raw);
       const merged = deepMerge(DEFAULTS, parsed);
 
-      // v0.1.5 기본 Discord 표시 형식과 아이콘 구성을 마이그레이션합니다.
+      // v0.1.6 Discord 카드 브랜딩 구성을 마이그레이션합니다.
       // 사용자가 직접 바꾼 템플릿은 건드리지 않습니다.
-      if (Number(parsed.settingsSchemaVersion || 1) < 4) {
+      if (Number(parsed.settingsSchemaVersion || 1) < 5) {
         if (
           !parsed.detailsTemplate ||
           parsed.detailsTemplate === '{server}' ||
@@ -85,8 +86,12 @@ class SettingsStore {
         if (!parsed.sectionLabels?.settings || parsed.sectionLabels.settings === '서버 설정 확인 중') {
           merged.sectionLabels.settings = '위어드호스트 설정 확인 중';
         }
-        merged.activityType = 3;
-        merged.settingsSchemaVersion = 4;
+        // 이전 버전에서 잘못된/없는 Rich Presence asset key를 사용해 ? 아이콘이 뜨는 일을 막고,
+        // Discord 애플리케이션 아이콘을 기본 큰 이미지로 사용합니다.
+        merged.largeImageKey = '';
+        merged.largeImageText = 'weirdhost';
+        merged.activityType = Number(parsed.activityType ?? 3);
+        merged.settingsSchemaVersion = 5;
         try {
           fs.mkdirSync(path.dirname(this.file), { recursive: true });
           fs.writeFileSync(this.file, JSON.stringify(merged, null, 2), 'utf8');

@@ -166,12 +166,16 @@
           <div class="form-grid">
             <label class="check"><input type="checkbox" id="autoUpdate" /> 시작할 때 업데이트 자동 확인</label>
             <div></div>
-            <label>Discord 큰 이미지 키
-              <input id="largeImageKey" placeholder="비워두면 사용 안 함" />
-            </label>
-            <label>큰 이미지 설명
-              <input id="largeImageText" placeholder="weirdhost" />
-            </label>
+            <div class="branding-help">
+              <div class="field-title">Discord 카드 이름 / 아이콘</div>
+              <small>빨간 부분 이름은 <b>weirdhost</b>, 큰 이미지는 Discord 애플리케이션 아이콘을 사용합니다.</small>
+              <div class="update-row">
+                <button type="button" id="openDiscordAssetsBtn">위어드호스트 아이콘 파일 열기</button>
+                <button type="button" id="openDiscordPortalBrandingBtn">Discord Developer Portal 열기</button>
+              </div>
+              <small>Developer Portal → General Information에서 앱 이름을 <b>weirdhost</b>로 바꾸고, Application Icon에 <b>weirdhost.png</b>를 업로드하세요.</small>
+            </div>
+            <div></div>
           </div>
           <div class="update-row">
             <button id="openExtensionBtn">확장프로그램 폴더 열기</button>
