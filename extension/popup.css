@@ -1,0 +1,7 @@
+body { margin:0; width:310px; background:#11141d; color:#f4f6ff; font:13px system-ui,sans-serif; }
+main { padding:16px; }
+h1 { font-size:16px; margin:0 0 14px; }
+.row { display:flex; justify-content:space-between; gap:12px; padding:10px 0; border-bottom:1px solid #2b3040; }
+span,p { color:#98a0b6; }
+strong { text-align:right; max-width:170px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+p { font-size:12px; line-height:1.5; margin:14px 0 0; }

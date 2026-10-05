@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WeirdHost Presence</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="shell">
+    <header class="hero">
+      <div>
+        <div class="eyebrow">WEIRDHOST × DISCORD</div>
+        <h1>WeirdHost Presence</h1>
+        <p>위어드호스트에서 보고 있는 서버와 메뉴를 Discord 활동으로 표시합니다.</p>
+      </div>
+      <div class="status-pill" id="mainStatus">연결 확인 중</div>
+    </header>
+
+    <section class="grid top-grid">
+      <article class="card current-card">
+        <h2>현재 상태</h2>
+        <div class="metric"><span>서비스</span><strong id="serviceState">-</strong></div>
+        <div class="metric"><span>확장프로그램</span><strong id="extensionState">-</strong></div>
+        <div class="metric"><span>Discord</span><strong id="discordState">-</strong></div>
+        <div class="metric"><span>현재 서버</span><strong id="serverState">-</strong></div>
+        <div class="metric"><span>현재 메뉴</span><strong id="sectionState">-</strong></div>
+        <div class="actions">
+          <button id="startBtn" class="primary">시작</button>
+          <button id="stopBtn">정지</button>
+          <button id="quitBtn" class="danger ghost">앱 종료</button>
+        </div>
+      </article>
+
+      <article class="card preview-card">
+        <h2>Discord 표시 미리보기</h2>
+        <div class="discord-preview">
+          <div class="fake-avatar"></div>
+          <div>
+            <strong id="previewType">시청 중 WeirdHost</strong>
+            <div id="previewDetails">WeirdHost 서버</div>
+            <div id="previewState">서버 관리 중</div>
+          </div>
+        </div>
+        <p class="hint">맨 위의 앱 이름은 Discord Developer Portal에 만든 애플리케이션 이름을 사용합니다.</p>
+      </article>
+    </section>
+
+    <section class="card">
+      <div class="section-title">
+        <div><h2>Discord 설정</h2><p>활동 종류와 표시 문구를 원하는 대로 바꿀 수 있습니다.</p></div>
+      </div>
+      <div class="form-grid">
+        <label class="full">Discord Application ID
+          <input id="clientId" placeholder="예: 123456789012345678" inputmode="numeric" />
+          <small>Discord Developer Portal에서 만든 애플리케이션의 ID가 필요합니다.</small>
+        </label>
+        <label>활동 종류
+          <select id="activityType">
+            <option value="3">시청 중 (추천)</option>
+            <option value="0">플레이 중</option>
+            <option value="2">듣는 중</option>
+            <option value="5">경쟁 중</option>
+          </select>
+        </label>
+        <label>기본 서버 문구
+          <input id="fallbackServerText" placeholder="WeirdHost 서버" />
+        </label>
+        <label>첫 번째 줄 템플릿
+          <input id="detailsTemplate" placeholder="{server}" />
+          <small>{server}, {section}, {host}, {title}</small>
+        </label>
+        <label>두 번째 줄 템플릿
+          <input id="stateTemplate" placeholder="{section}" />
+          <small>{server}, {section}, {host}, {title}</small>
+        </label>
+        <label class="check"><input type="checkbox" id="showServerName" /> 서버 이름 표시</label>
+        <label class="check"><input type="checkbox" id="showSection" /> 현재 메뉴 표시</label>
+        <label class="check"><input type="checkbox" id="showElapsedTime" /> 이용 시간 표시</label>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-title"><div><h2>페이지별 문구</h2><p>위어드호스트에서 감지한 메뉴가 Discord에 어떻게 표시될지 정합니다.</p></div></div>
+      <div class="form-grid labels" id="sectionLabels"></div>
+    </section>
+
+    <section class="card">
+      <div class="section-title"><div><h2>앱 설정</h2><p>Windows 시작과 업데이트 방식을 설정합니다.</p></div></div>
+      <div class="form-grid">
+        <label class="check"><input type="checkbox" id="launchAtStartup" /> PC를 켜면 자동 실행</label>
+        <label class="check"><input type="checkbox" id="autoUpdate" /> 시작할 때 업데이트 자동 확인</label>
+        <label>Discord 큰 이미지 키
+          <input id="largeImageKey" placeholder="비워두면 사용 안 함" />
+        </label>
+        <label>큰 이미지 설명
+          <input id="largeImageText" placeholder="WeirdHost" />
+        </label>
+      </div>
+      <div class="update-row">
+        <button id="openExtensionBtn">확장프로그램 폴더 열기</button>
+        <span id="updateStatus">업데이트 상태 확인 중</span>
+        <button id="checkUpdateBtn">업데이트 확인</button>
+        <button id="installUpdateBtn" class="primary" hidden>재시작하여 업데이트</button>
+      </div>
+    </section>
+
+    <footer>
+      <button id="saveBtn" class="primary wide">설정 저장</button>
+      <span id="saveNotice"></span>
+    </footer>
+  </main>
+  <script src="renderer.js"></script>
+</body>
+</html>

@@ -1,0 +1,65 @@
+{
+  "name": "weirdhost-presence",
+  "version": "0.1.0",
+  "description": "Discord Rich Presence companion for Weirdhost",
+  "main": "src/main.js",
+  "author": "pullgena",
+  "license": "MIT",
+  "private": false,
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win nsis",
+    "pack": "electron-builder --dir",
+    "check": "node --check src/main.js && node --check src/discord-ipc.js && node --check src/bridge-server.js && node --check src/settings.js && node --check src/preload.js && node --check src/renderer/renderer.js && node --check extension/service_worker.js && node --check extension/content.js && node --check extension/popup.js"
+  },
+  "dependencies": {
+    "electron-log": "5.4.3",
+    "electron-updater": "6.8.9"
+  },
+  "devDependencies": {
+    "electron": "44.5.1",
+    "electron-builder": "26.15.3"
+  },
+  "build": {
+    "appId": "xyz.weirdhost.presence",
+    "productName": "WeirdHost Presence",
+    "asar": true,
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "src/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "extension",
+        "to": "extension"
+      }
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ],
+      "artifactName": "WeirdHost-Presence-Setup-${version}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "runAfterFinish": true
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "pullgena",
+        "repo": "weirdhost_app",
+        "releaseType": "release"
+      }
+    ]
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "manifest_version": 3,
+  "name": "WeirdHost Presence Bridge",
+  "version": "0.1.0",
+  "description": "WeirdHost 페이지 상태를 WeirdHost Presence 앱에 전달합니다.",
+  "permissions": ["tabs", "storage"],
+  "host_permissions": [
+    "https://*.weirdhost.xyz/*",
+    "https://weirdhost.xyz/*",
+    "http://127.0.0.1:32145/*"
+  ],
+  "background": {
+    "service_worker": "service_worker.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*.weirdhost.xyz/*",
+        "https://weirdhost.xyz/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_title": "WeirdHost Presence",
+    "default_popup": "popup.html"
+  }
+}
