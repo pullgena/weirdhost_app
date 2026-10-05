@@ -91,26 +91,127 @@ function renderPreview(state, useForm = false) {
   $('previewState').textContent = applyTemplate(s.stateTemplate, vars) || '—';
 }
 
+function setStatusValue(id, text, tone = 'neutral') {
+  const el = $(id);
+  el.textContent = text;
+  el.className = `status-value ${tone}`;
+}
+
+function diagnose(state) {
+  const page = state.service.current || {};
+  const settings = state.settings || {};
+  const discordMessage = String(state.discord?.message || '');
+
+  if (!state.service.enabled) {
+    return {
+      level: 'off',
+      title: 'Presence가 정지되어 있습니다',
+      message: '시작 버튼을 누르면 연결 확인을 시작합니다.',
+      tip: '왼쪽 아래의 “시작” 버튼을 눌러주세요.'
+    };
+  }
+
+  if (!settings.discordApplicationId) {
+    return {
+      level: 'error',
+      title: 'Discord 앱 ID가 필요합니다',
+      message: 'Discord Application ID를 저장해야 활동을 표시할 수 있습니다.',
+      tip: '아래 간단 설정 1번에 Application ID 숫자를 붙여넣고 “저장하고 적용”을 눌러주세요.'
+    };
+  }
+
+  if (!state.service.bridgeListening) {
+    return {
+      level: 'error',
+      title: '브라우저 연결 서버를 시작하지 못했습니다',
+      message: state.service.bridgeMessage || '로컬 브리지에 문제가 있습니다.',
+      tip: '“다시 확인”을 눌러보세요. 계속 실패하면 다른 프로그램이 32145 포트를 사용 중인지 확인해야 합니다.'
+    };
+  }
+
+  if (!state.service.extensionConnected) {
+    return {
+      level: 'waiting',
+      title: '확장프로그램 연결 대기 중',
+      message: 'Chrome/Edge 확장프로그램에서 아직 신호가 오지 않았습니다.',
+      tip: '확장프로그램이 켜져 있는지 확인한 뒤 WeirdHost 탭을 한 번 열거나 전환해 주세요.'
+    };
+  }
+
+  if (!page.active) {
+    return {
+      level: 'waiting',
+      title: 'WeirdHost 탭을 기다리는 중',
+      message: '확장프로그램은 정상 연결됐지만 현재 활성 탭이 WeirdHost가 아닙니다.',
+      tip: 'Chrome/Edge에서 WeirdHost 탭을 클릭해 활성화해 주세요.'
+    };
+  }
+
+  if (!state.discord?.connected) {
+    const hardError = /찾지 못|오류|실패|끊어|invalid|denied|close/i.test(discordMessage);
+    return {
+      level: hardError ? 'error' : 'waiting',
+      title: hardError ? 'Discord 연결 오류' : 'Discord 연결 중',
+      message: discordMessage || 'Discord 데스크톱 앱과 연결하고 있습니다.',
+      tip: hardError
+        ? 'Discord 데스크톱 앱이 실행 중인지, Application ID가 정확한지 확인한 뒤 “다시 확인”을 눌러주세요.'
+        : '잠시 기다려주세요. 오래 걸리면 “다시 확인”을 눌러주세요.'
+    };
+  }
+
+  return {
+    level: 'ok',
+    title: '정상 작동 중',
+    message: 'WeirdHost 정보가 Discord 활동으로 전송되고 있습니다.',
+    tip: '서버나 메뉴를 이동하면 Discord 표시도 자동으로 바뀝니다.'
+  };
+}
+
 function render(state, first = false) {
   currentState = state;
   const page = state.service.current || {};
-  $('serviceState').textContent = state.service.enabled ? '실행 중' : '정지됨';
-  $('extensionState').textContent = state.service.extensionConnected ? '연결됨' : '신호 없음';
-  $('discordState').textContent = state.discord.message || (state.discord.connected ? '연결됨' : '연결 대기');
+  const diagnosis = diagnose(state);
+
+  const health = $('healthBanner');
+  health.className = `health-banner ${diagnosis.level}`;
+  $('healthIcon').textContent = diagnosis.level === 'ok' ? '●' : diagnosis.level === 'error' ? '!' : diagnosis.level === 'off' ? 'Ⅱ' : '…';
+  $('healthTitle').textContent = diagnosis.title;
+  $('healthMessage').textContent = diagnosis.message;
+  $('diagnosticTip').textContent = diagnosis.tip;
+
+  setStatusValue('serviceState', state.service.enabled ? '켜짐' : '정지됨', state.service.enabled ? 'ok' : 'off');
+  setStatusValue(
+    'extensionState',
+    state.service.extensionConnected ? '연결됨' : (state.service.bridgeListening ? '연결 대기' : '브리지 오류'),
+    state.service.extensionConnected ? 'ok' : (state.service.bridgeListening ? 'waiting' : 'error')
+  );
+  setStatusValue(
+    'discordState',
+    state.discord?.message || (state.discord?.connected ? '연결됨' : '연결 대기'),
+    state.discord?.connected ? 'ok' : (/찾지 못|오류|실패|끊어/i.test(state.discord?.message || '') ? 'error' : 'waiting')
+  );
 
   if (page.active) {
     const server = page.serverName || state.settings.fallbackServerText || 'WeirdHost 서버';
     const section = sectionNames[page.section] || page.section || '기타';
-    $('currentPageState').textContent = `${server} · ${section}`;
+    setStatusValue('currentPageState', `${server} · ${section}`, 'ok');
   } else {
-    $('currentPageState').textContent = '위어드호스트 탭 없음';
+    setStatusValue('currentPageState', '활성 WeirdHost 탭 없음', state.service.extensionConnected ? 'waiting' : 'neutral');
   }
 
-  $('mainStatus').textContent = state.service.enabled && page.active ? '활동 표시 중' : state.service.enabled ? '대기 중' : '정지됨';
+  const mainLabels = {
+    ok: '🟢 정상 작동 중',
+    waiting: '🟡 연결 대기',
+    error: '🔴 확인 필요',
+    off: '⚪ 정지됨'
+  };
+  $('mainStatus').textContent = mainLabels[diagnosis.level] || diagnosis.title;
+  $('mainStatus').className = `status-pill ${diagnosis.level}`;
   $('updateStatus').textContent = state.updater.message || `v${state.version}`;
   $('installUpdateBtn').hidden = state.updater.status !== 'ready';
   $('startBtn').disabled = state.service.enabled;
   $('stopBtn').disabled = !state.service.enabled;
+  $('retryBtn').disabled = false;
   if (first) fillSettings(state.settings);
   renderPreview(state, true);
 }
@@ -149,6 +250,12 @@ async function init() {
 
   $('startBtn').addEventListener('click', async () => render(await window.weirdhost.setServiceEnabled(true)));
   $('stopBtn').addEventListener('click', async () => render(await window.weirdhost.setServiceEnabled(false)));
+  $('retryBtn').addEventListener('click', async () => {
+    $('retryBtn').disabled = true;
+    $('retryBtn').textContent = '확인 중…';
+    try { render(await window.weirdhost.retryConnections()); }
+    finally { $('retryBtn').disabled = false; $('retryBtn').textContent = '다시 확인'; }
+  });
   $('quitBtn').addEventListener('click', () => window.weirdhost.quit());
   $('openExtensionBtn').addEventListener('click', () => window.weirdhost.openExtensionFolder());
   $('openDiscordPortalBtn').addEventListener('click', () => window.weirdhost.openDiscordPortal());

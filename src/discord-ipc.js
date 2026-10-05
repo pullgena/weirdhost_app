@@ -47,6 +47,7 @@ class DiscordIpcClient extends EventEmitter {
     this.clientId = String(clientId).trim();
     if (this.ready || this.connecting) return;
     this.connecting = true;
+    this.emit('status', { connected: false, message: 'Discord 연결 중…' });
     const names = pipeNames();
     let lastError = null;
 

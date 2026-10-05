@@ -16,7 +16,8 @@ let staleTimer = null;
 let sessionStartedAt = 0;
 let lastPage = { active: false };
 let updaterState = { status: 'idle', version: app.getVersion(), progress: 0, message: '' };
-let discordState = { connected: false, message: '연결 대기 중' };
+let discordState = { connected: false, message: '연결 대기 중', level: 'waiting' };
+let bridgeState = { listening: false, message: '브리지 시작 대기 중' };
 
 function trayIcon() {
   const svg = `
@@ -202,6 +203,8 @@ function stateSnapshot() {
     service: {
       enabled: settings.enabled,
       bridgePort: bridge?.port || settings.bridgePort,
+      bridgeListening: Boolean(bridgeState.listening),
+      bridgeMessage: bridgeState.message,
       extensionConnected: Boolean(bridge?.lastSeenAt && Date.now() - bridge.lastSeenAt < settings.staleAfterMs),
       current: lastPage,
       activityTypeLabel: activityTypeName(settings.activityType)
@@ -279,12 +282,39 @@ function registerIpc() {
       await bridge.stop();
       bridge = new BridgeServer(saved.bridgePort);
       bridge.on('activity', onBridgeActivity);
-      await bridge.start();
+      try {
+        await bridge.start();
+        bridgeState = { listening: true, message: `로컬 브리지 ${saved.bridgePort} 포트 정상` };
+      } catch (error) {
+        bridgeState = { listening: false, message: `로컬 브리지 시작 실패: ${error.message}` };
+        throw error;
+      }
     }
     applyStartupSetting();
     refreshTrayMenu();
     if (saved.discordApplicationId !== before.discordApplicationId) {
       try { await discord.switchApplication(saved.discordApplicationId); } catch {}
+    }
+    await syncPresence();
+    return stateSnapshot();
+  });
+  ipcMain.handle('app:retry-connections', async () => {
+    const settings = store.get();
+    if (!bridgeState.listening) {
+      try {
+        await bridge.stop().catch(() => {});
+        bridge = new BridgeServer(settings.bridgePort);
+        bridge.on('activity', onBridgeActivity);
+        await bridge.start();
+        bridgeState = { listening: true, message: `로컬 브리지 ${settings.bridgePort} 포트 정상` };
+      } catch (error) {
+        bridgeState = { listening: false, message: `로컬 브리지 시작 실패: ${error.message}` };
+      }
+    }
+    if (settings.discordApplicationId) {
+      discordState = { connected: false, message: 'Discord 다시 연결 중…', level: 'waiting' };
+      broadcastState();
+      try { await discord.switchApplication(settings.discordApplicationId); } catch {}
     }
     await syncPresence();
     return stateSnapshot();
@@ -319,7 +349,11 @@ app.whenReady().then(async () => {
 
   bridge = new BridgeServer(store.get().bridgePort);
   bridge.on('activity', onBridgeActivity);
-  try { await bridge.start(); } catch (error) {
+  try {
+    await bridge.start();
+    bridgeState = { listening: true, message: `로컬 브리지 ${store.get().bridgePort} 포트 정상` };
+  } catch (error) {
+    bridgeState = { listening: false, message: `로컬 브리지 시작 실패: ${error.message}` };
     log.error('Bridge start failed', error);
   }
 
@@ -335,7 +369,12 @@ app.whenReady().then(async () => {
 
   const settings = store.get();
   if (settings.discordApplicationId) {
+    discordState = { connected: false, message: 'Discord 연결 중…', level: 'waiting' };
+    broadcastState();
     discord.connect(settings.discordApplicationId).catch(() => {});
+  } else {
+    discordState = { connected: false, message: 'Discord 앱 ID가 필요합니다.', level: 'error' };
+    broadcastState();
   }
   if (settings.autoUpdate) setTimeout(() => checkUpdates(), 3000);
 });

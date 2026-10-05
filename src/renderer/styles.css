@@ -97,3 +97,26 @@ input[type="checkbox"] { width:18px; height:18px; accent-color:var(--accent); }
   .inline-input-button { grid-template-columns:1fr; }
   .simple-title { align-items:flex-start; flex-direction:column; }
 }
+
+/* v0.1.2 connection diagnostics */
+.health-banner { display:flex; align-items:flex-start; gap:12px; padding:13px 14px; margin:12px 0 8px; border:1px solid var(--line); border-radius:13px; background:#111520; }
+.health-icon { width:28px; height:28px; flex:none; display:grid; place-items:center; border-radius:50%; font-weight:900; font-size:14px; background:#2b3142; color:#c9d0e4; }
+.health-copy { display:flex; flex-direction:column; gap:3px; min-width:0; }
+.health-copy strong { font-size:14px; }
+.health-copy span { color:var(--muted); font-size:12px; line-height:1.5; }
+.health-banner.ok { border-color:rgba(67,181,129,.45); background:rgba(67,181,129,.08); }
+.health-banner.ok .health-icon { background:rgba(67,181,129,.2); color:#72dfac; }
+.health-banner.waiting { border-color:rgba(250,166,26,.45); background:rgba(250,166,26,.07); }
+.health-banner.waiting .health-icon { background:rgba(250,166,26,.18); color:#ffc56b; }
+.health-banner.error { border-color:rgba(240,93,111,.55); background:rgba(240,93,111,.08); }
+.health-banner.error .health-icon { background:rgba(240,93,111,.2); color:#ff9eaa; }
+.health-banner.off { opacity:.86; }
+.diagnostic-tip { min-height:35px; margin-top:10px; padding:10px 12px; border-radius:10px; background:#10131d; color:#aeb6cd; font-size:12px; line-height:1.5; }
+.status-value.ok { color:#72dfac; }
+.status-value.waiting { color:#ffc56b; }
+.status-value.error { color:#ff9eaa; }
+.status-value.off, .status-value.neutral { color:#b1b8ca; }
+.status-pill.ok { border-color:rgba(67,181,129,.45); color:#72dfac; background:rgba(67,181,129,.10); }
+.status-pill.waiting { border-color:rgba(250,166,26,.4); color:#ffc56b; background:rgba(250,166,26,.08); }
+.status-pill.error { border-color:rgba(240,93,111,.5); color:#ff9eaa; background:rgba(240,93,111,.09); }
+.status-pill.off { color:#b1b8ca; }

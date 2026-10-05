@@ -4,6 +4,7 @@ contextBridge.exposeInMainWorld('weirdhost', {
   getState: () => ipcRenderer.invoke('app:get-state'),
   saveSettings: (settings) => ipcRenderer.invoke('app:save-settings', settings),
   setServiceEnabled: (enabled) => ipcRenderer.invoke('app:set-service-enabled', enabled),
+  retryConnections: () => ipcRenderer.invoke('app:retry-connections'),
   quit: () => ipcRenderer.invoke('app:quit'),
   checkForUpdates: () => ipcRenderer.invoke('app:check-updates'),
   installUpdate: () => ipcRenderer.invoke('app:install-update'),

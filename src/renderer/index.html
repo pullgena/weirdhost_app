@@ -25,15 +25,24 @@
             <p class="subtext">평소에는 이 부분만 확인하면 됩니다.</p>
           </div>
         </div>
-        <div class="status-list">
-          <div class="metric"><span>Presence</span><strong id="serviceState">-</strong></div>
-          <div class="metric"><span>브라우저 연결</span><strong id="extensionState">-</strong></div>
-          <div class="metric"><span>Discord</span><strong id="discordState">-</strong></div>
-          <div class="metric"><span>현재 위치</span><strong id="currentPageState">-</strong></div>
+        <div class="health-banner waiting" id="healthBanner">
+          <div class="health-icon" id="healthIcon">●</div>
+          <div class="health-copy">
+            <strong id="healthTitle">상태 확인 중…</strong>
+            <span id="healthMessage">연결 상태를 확인하고 있습니다.</span>
+          </div>
         </div>
+        <div class="status-list">
+          <div class="metric"><span>Presence</span><strong id="serviceState" class="status-value">-</strong></div>
+          <div class="metric"><span>확장프로그램</span><strong id="extensionState" class="status-value">-</strong></div>
+          <div class="metric"><span>Discord</span><strong id="discordState" class="status-value">-</strong></div>
+          <div class="metric"><span>현재 위치</span><strong id="currentPageState" class="status-value">-</strong></div>
+        </div>
+        <div class="diagnostic-tip" id="diagnosticTip"></div>
         <div class="actions">
           <button id="startBtn" class="primary">시작</button>
           <button id="stopBtn">정지</button>
+          <button id="retryBtn">다시 확인</button>
           <button id="quitBtn" class="danger ghost">앱 종료</button>
         </div>
       </article>
