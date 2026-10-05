@@ -42,7 +42,7 @@ function collectSettings() {
   const sectionLabels = {};
   document.querySelectorAll('[data-section]').forEach((input) => { sectionLabels[input.dataset.section] = input.value.trim(); });
   return {
-    discordApplicationId: $('clientId').value.trim(),
+    discordApplicationId: $('clientId').value.replace(/\D/g, ''),
     activityType: Number($('activityType').value),
     fallbackServerText: $('fallbackServerText').value.trim(),
     detailsTemplate: $('detailsTemplate').value.trim(),
@@ -66,13 +66,27 @@ function applyTemplate(template, vars) {
     .replaceAll('{title}', vars.title);
 }
 
-function renderPreview(state) {
-  const s = state.settings;
+function previewSettingsFromForm(base) {
+  if (!$('clientId')) return base;
+  return {
+    ...base,
+    ...collectSettings()
+  };
+}
+
+function renderPreview(state, useForm = false) {
+  const s = useForm ? previewSettingsFromForm(state.settings) : state.settings;
   const page = state.service.current || {};
   const section = (s.sectionLabels || {})[page.section] || s.sectionLabels?.other || '서버 관리 중';
   const server = s.showServerName ? (page.serverName || s.fallbackServerText) : s.fallbackServerText;
-  const vars = { server: server || 'WeirdHost 서버', section: s.showSection ? section : 'WeirdHost 이용 중', host: page.host || '', title: page.title || '' };
-  $('previewType').textContent = `${state.service.activityTypeLabel} WeirdHost`;
+  const vars = {
+    server: server || 'WeirdHost 서버',
+    section: s.showSection ? section : 'WeirdHost 이용 중',
+    host: page.host || '',
+    title: page.title || ''
+  };
+  const typeLabel = ({ 0: '플레이 중', 2: '듣는 중', 3: '시청 중', 5: '경쟁 중' })[Number(s.activityType)] || '시청 중';
+  $('previewType').textContent = `${typeLabel} WeirdHost`;
   $('previewDetails').textContent = applyTemplate(s.detailsTemplate, vars) || '—';
   $('previewState').textContent = applyTemplate(s.stateTemplate, vars) || '—';
 }
@@ -83,34 +97,79 @@ function render(state, first = false) {
   $('serviceState').textContent = state.service.enabled ? '실행 중' : '정지됨';
   $('extensionState').textContent = state.service.extensionConnected ? '연결됨' : '신호 없음';
   $('discordState').textContent = state.discord.message || (state.discord.connected ? '연결됨' : '연결 대기');
-  $('serverState').textContent = page.active ? (page.serverName || state.settings.fallbackServerText || '감지 중') : '위어드호스트 탭 없음';
-  $('sectionState').textContent = page.active ? (sectionNames[page.section] || page.section || '기타') : '-';
+
+  if (page.active) {
+    const server = page.serverName || state.settings.fallbackServerText || 'WeirdHost 서버';
+    const section = sectionNames[page.section] || page.section || '기타';
+    $('currentPageState').textContent = `${server} · ${section}`;
+  } else {
+    $('currentPageState').textContent = '위어드호스트 탭 없음';
+  }
+
   $('mainStatus').textContent = state.service.enabled && page.active ? '활동 표시 중' : state.service.enabled ? '대기 중' : '정지됨';
   $('updateStatus').textContent = state.updater.message || `v${state.version}`;
   $('installUpdateBtn').hidden = state.updater.status !== 'ready';
   $('startBtn').disabled = state.service.enabled;
   $('stopBtn').disabled = !state.service.enabled;
-  renderPreview(state);
   if (first) fillSettings(state.settings);
+  renderPreview(state, true);
+}
+
+function applyRecommendedSettings() {
+  $('activityType').value = '3';
+  $('showServerName').checked = true;
+  $('showSection').checked = true;
+  $('showElapsedTime').checked = true;
+  $('launchAtStartup').checked = true;
+  $('fallbackServerText').value = 'WeirdHost 서버';
+  $('detailsTemplate').value = '{server}';
+  $('stateTemplate').value = '{section}';
+  if (currentState) renderPreview(currentState, true);
+}
+
+function bindLivePreview() {
+  const ids = [
+    'activityType', 'fallbackServerText', 'detailsTemplate', 'stateTemplate',
+    'showServerName', 'showSection', 'showElapsedTime'
+  ];
+  ids.forEach((id) => {
+    $(id).addEventListener('input', () => currentState && renderPreview(currentState, true));
+    $(id).addEventListener('change', () => currentState && renderPreview(currentState, true));
+  });
+  document.querySelectorAll('[data-section]').forEach((input) => {
+    input.addEventListener('input', () => currentState && renderPreview(currentState, true));
+  });
 }
 
 async function init() {
   const state = await window.weirdhost.getState();
   render(state, true);
+  bindLivePreview();
   window.weirdhost.onState((next) => render(next));
 
   $('startBtn').addEventListener('click', async () => render(await window.weirdhost.setServiceEnabled(true)));
   $('stopBtn').addEventListener('click', async () => render(await window.weirdhost.setServiceEnabled(false)));
   $('quitBtn').addEventListener('click', () => window.weirdhost.quit());
   $('openExtensionBtn').addEventListener('click', () => window.weirdhost.openExtensionFolder());
+  $('openDiscordPortalBtn').addEventListener('click', () => window.weirdhost.openDiscordPortal());
+  $('recommendedBtn').addEventListener('click', applyRecommendedSettings);
   $('checkUpdateBtn').addEventListener('click', async () => {
     await window.weirdhost.checkForUpdates();
   });
   $('installUpdateBtn').addEventListener('click', () => window.weirdhost.installUpdate());
   $('saveBtn').addEventListener('click', async () => {
+    const id = $('clientId').value.replace(/\D/g, '');
+    $('clientId').value = id;
+    if (!id) {
+      $('saveNotice').textContent = 'Discord 앱 ID를 먼저 입력해 주세요.';
+      $('saveNotice').classList.add('error');
+      $('clientId').focus();
+      return;
+    }
     const next = await window.weirdhost.saveSettings(collectSettings());
     render(next);
-    $('saveNotice').textContent = '저장되었습니다.';
+    $('saveNotice').classList.remove('error');
+    $('saveNotice').textContent = '저장하고 적용했습니다.';
     setTimeout(() => { $('saveNotice').textContent = ''; }, 1800);
   });
 }

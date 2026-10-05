@@ -290,6 +290,10 @@ function registerIpc() {
     return stateSnapshot();
   });
   ipcMain.handle('app:check-updates', () => checkUpdates());
+  ipcMain.handle('app:open-discord-portal', async () => {
+    await shell.openExternal('https://discord.com/developers/applications');
+    return true;
+  });
   ipcMain.handle('app:open-extension-folder', async () => {
     const extensionPath = app.isPackaged
       ? path.join(process.resourcesPath, 'extension')

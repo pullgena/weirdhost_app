@@ -8,6 +8,7 @@ contextBridge.exposeInMainWorld('weirdhost', {
   checkForUpdates: () => ipcRenderer.invoke('app:check-updates'),
   installUpdate: () => ipcRenderer.invoke('app:install-update'),
   openExtensionFolder: () => ipcRenderer.invoke('app:open-extension-folder'),
+  openDiscordPortal: () => ipcRenderer.invoke('app:open-discord-portal'),
   onState: (callback) => {
     const handler = (_event, state) => callback(state);
     ipcRenderer.on('app:state', handler);
