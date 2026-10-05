@@ -12,6 +12,7 @@ const sectionNames = {
   activity: '활동',
   properties: '서버 설정',
   playermanager: '플레이어 관리',
+  ready: '준비중',
   other: '기타'
 };
 
@@ -167,6 +168,15 @@ function diagnose(state) {
     };
   }
 
+  if (page.viewing === false) {
+    return {
+      level: 'ok',
+      title: '준비중',
+      message: 'WeirdHost 탭은 열려 있지만 현재 보고 있지 않습니다.',
+      tip: 'WeirdHost 탭으로 돌아가면 서버와 현재 메뉴 표시로 자동 전환됩니다.'
+    };
+  }
+
   return {
     level: 'ok',
     title: '정상 작동 중',
@@ -202,7 +212,7 @@ function render(state, first = false) {
   if (page.active) {
     const server = page.serverName || state.settings.fallbackServerText || 'weirdhost 서버';
     const section = sectionNames[page.section] || page.section || '기타';
-    setStatusValue('currentPageState', `${server} · ${section}`, 'ok');
+    setStatusValue('currentPageState', page.viewing === false ? `${server} · 준비중` : `${server} · ${section}`, 'ok');
   } else {
     setStatusValue('currentPageState', '활성 WeirdHost 탭 없음', state.service.extensionConnected ? 'waiting' : 'neutral');
   }
@@ -213,7 +223,7 @@ function render(state, first = false) {
     error: '🔴 확인 필요',
     off: '⚪ 정지됨'
   };
-  $('mainStatus').textContent = mainLabels[diagnosis.level] || diagnosis.title;
+  $('mainStatus').textContent = diagnosis.title === '준비중' ? '🟢 준비중' : (mainLabels[diagnosis.level] || diagnosis.title);
   $('mainStatus').className = `status-pill ${diagnosis.level}`;
   $('updateStatus').textContent = state.updater.message || `v${state.version}`;
   $('installUpdateBtn').hidden = state.updater.status !== 'ready';

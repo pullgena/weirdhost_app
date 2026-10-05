@@ -26,6 +26,7 @@ const DEFAULTS = {
     activity: '활동 확인 중',
     properties: '서버 설정 확인 중',
     playermanager: '플레이어 관리 중',
+    ready: '준비중',
     other: '서버 관리 중'
   },
 
@@ -35,7 +36,7 @@ const DEFAULTS = {
   autoUpdate: true,
   bridgePort: 32145,
   staleAfterMs: 15000,
-  settingsSchemaVersion: 5
+  settingsSchemaVersion: 6
 };
 
 function deepMerge(base, override) {
@@ -92,6 +93,15 @@ class SettingsStore {
         merged.largeImageText = 'weirdhost';
         merged.activityType = Number(parsed.activityType ?? 3);
         merged.settingsSchemaVersion = 5;
+      }
+
+      // v0.1.8: WeirdHost 탭이 열려 있지만 현재 보고 있지 않을 때 사용할 상태입니다.
+      if (Number(parsed.settingsSchemaVersion || 1) < 6) {
+        if (!parsed.sectionLabels?.ready) merged.sectionLabels.ready = '준비중';
+        merged.settingsSchemaVersion = 6;
+      }
+
+      if (Number(parsed.settingsSchemaVersion || 1) < 6) {
         try {
           fs.mkdirSync(path.dirname(this.file), { recursive: true });
           fs.writeFileSync(this.file, JSON.stringify(merged, null, 2), 'utf8');

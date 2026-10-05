@@ -1,5 +1,8 @@
 const APP_URL = 'http://127.0.0.1:32145';
 let lastPayload = { active: false };
+let lastWeirdHostTabId = null;
+const pageStates = new Map();
+let refreshTimer = null;
 
 function isWeirdHostUrl(url = '') {
   try {
@@ -47,7 +50,6 @@ async function normalizeServerName(payload) {
 
   if (reliable && candidate) {
     cache[serverId] = candidate;
-    // 오래된 캐시가 무한히 커지지 않도록 최근 100개만 유지합니다.
     const entries = Object.entries(cache);
     if (entries.length > 100) {
       for (const [key] of entries.slice(0, entries.length - 100)) delete cache[key];
@@ -56,10 +58,7 @@ async function normalizeServerName(payload) {
     return { ...payload, serverId, serverName: candidate };
   }
 
-  // 새로고침/라우팅 직후 DOM이 아직 안 만들어졌다면 이전에 확인한 정상 이름을 유지합니다.
   if (cached) return { ...payload, serverId, serverName: cached };
-
-  // 캐시가 아직 없는 최초 접속에서는 임시 로딩 문자열을 서버 이름으로 보내지 않습니다.
   return { ...payload, serverId, serverName: isTransientName(candidate) ? '' : candidate };
 }
 
@@ -82,48 +81,118 @@ async function sendToApp(payload) {
   }
 }
 
-async function updateFromActiveTab(windowId) {
-  let tabs = [];
+function fallbackStateForTab(tab) {
+  let host = '';
+  try { host = new URL(tab?.url || '').host; } catch {}
+  return {
+    kind: 'WEIRDHOST_PAGE_STATE',
+    active: true,
+    viewing: false,
+    url: tab?.url || '',
+    host,
+    serverId: serverIdFromUrl(tab?.url || ''),
+    serverName: '',
+    serverNameReliable: false,
+    section: 'ready',
+    title: tab?.title || ''
+  };
+}
+
+async function requestTabState(tab) {
+  if (!tab?.id) return fallbackStateForTab(tab);
   try {
-    tabs = await chrome.tabs.query({ active: true, windowId: windowId ?? chrome.windows.WINDOW_ID_CURRENT });
+    const response = await chrome.tabs.sendMessage(tab.id, { kind: 'WEIRDHOST_REQUEST_STATE' });
+    if (response?.kind === 'WEIRDHOST_PAGE_STATE') {
+      pageStates.set(tab.id, response);
+      return response;
+    }
   } catch {}
-  const tab = tabs[0];
-  if (!tab || !isWeirdHostUrl(tab.url)) {
-    return sendToApp({ active: false });
-  }
+  return pageStates.get(tab.id) || fallbackStateForTab(tab);
+}
+
+async function getFocusedActiveTab() {
   try {
-    await chrome.tabs.sendMessage(tab.id, { kind: 'WEIRDHOST_REQUEST_STATE' });
+    const win = await chrome.windows.getLastFocused();
+    if (!win?.focused) return { tab: null, browserFocused: false };
+    const tabs = await chrome.tabs.query({ active: true, windowId: win.id });
+    return { tab: tabs[0] || null, browserFocused: true };
   } catch {
-    sendToApp({
-      active: true,
-      url: tab.url || '',
-      host: new URL(tab.url).host,
-      serverId: serverIdFromUrl(tab.url || ''),
-      serverName: '',
-      serverNameReliable: false,
-      section: 'other',
-      title: tab.title || ''
-    });
+    return { tab: null, browserFocused: false };
   }
 }
 
+async function getWeirdHostTabs() {
+  try {
+    const tabs = await chrome.tabs.query({});
+    return tabs.filter((tab) => isWeirdHostUrl(tab.url));
+  } catch {
+    return [];
+  }
+}
+
+async function refreshPresenceState() {
+  const weirdTabs = await getWeirdHostTabs();
+  if (!weirdTabs.length) {
+    lastWeirdHostTabId = null;
+    pageStates.clear();
+    await sendToApp({ active: false, viewing: false });
+    return;
+  }
+
+  const { tab: activeTab, browserFocused } = await getFocusedActiveTab();
+  const viewingWeirdHost = Boolean(browserFocused && activeTab && isWeirdHostUrl(activeTab.url));
+
+  if (viewingWeirdHost) {
+    lastWeirdHostTabId = activeTab.id;
+    const state = await requestTabState(activeTab);
+    await sendToApp({
+      ...state,
+      active: true,
+      viewing: true,
+      section: state.section || 'other'
+    });
+    return;
+  }
+
+  // WeirdHost 탭은 열려 있지만 사용자가 현재 보고 있지 않은 상태입니다.
+  // 가장 최근에 보던 WeirdHost 탭의 서버 이름은 유지하고 메뉴 상태만 '준비중'으로 바꿉니다.
+  let candidate = weirdTabs.find((tab) => tab.id === lastWeirdHostTabId) || null;
+  if (!candidate) candidate = weirdTabs[0];
+  const state = await requestTabState(candidate);
+  await sendToApp({
+    ...state,
+    active: true,
+    viewing: false,
+    section: 'ready'
+  });
+}
+
+function scheduleRefresh(delay = 40) {
+  clearTimeout(refreshTimer);
+  refreshTimer = setTimeout(() => { refreshPresenceState().catch(() => {}); }, delay);
+}
+
 chrome.runtime.onMessage.addListener((msg, sender) => {
-  if (msg?.kind !== 'WEIRDHOST_PAGE_STATE') return;
-  if (!sender.tab?.active) return;
-  sendToApp(msg);
+  if (msg?.kind !== 'WEIRDHOST_PAGE_STATE' || !sender.tab?.id) return;
+  pageStates.set(sender.tab.id, msg);
+  if (sender.tab.active) lastWeirdHostTabId = sender.tab.id;
+  scheduleRefresh(20);
 });
 
-chrome.tabs.onActivated.addListener((info) => updateFromActiveTab(info.windowId));
+chrome.tabs.onActivated.addListener(() => scheduleRefresh(20));
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  if (tab.active && (changeInfo.url || changeInfo.status === 'complete' || changeInfo.title)) updateFromActiveTab(tab.windowId);
+  if (isWeirdHostUrl(tab.url) || pageStates.has(tabId) || changeInfo.url || changeInfo.status === 'complete') {
+    scheduleRefresh(80);
+  }
 });
-chrome.tabs.onRemoved.addListener(() => updateFromActiveTab());
-chrome.windows.onFocusChanged.addListener((windowId) => {
-  if (windowId !== chrome.windows.WINDOW_ID_NONE) updateFromActiveTab(windowId);
+chrome.tabs.onRemoved.addListener((tabId) => {
+  pageStates.delete(tabId);
+  if (lastWeirdHostTabId === tabId) lastWeirdHostTabId = null;
+  scheduleRefresh(20);
 });
-chrome.runtime.onStartup.addListener(() => updateFromActiveTab());
-chrome.runtime.onInstalled.addListener(() => updateFromActiveTab());
+chrome.windows.onFocusChanged.addListener(() => scheduleRefresh(20));
+chrome.runtime.onStartup.addListener(() => scheduleRefresh(100));
+chrome.runtime.onInstalled.addListener(() => scheduleRefresh(100));
 
-setInterval(() => {
-  if (lastPayload?.active) sendToApp(lastPayload);
-}, 8000);
+// MV3 서비스 워커가 살아 있는 동안 상태를 주기적으로 재확인합니다.
+setInterval(() => refreshPresenceState().catch(() => {}), 8000);

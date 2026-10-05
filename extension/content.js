@@ -124,8 +124,10 @@
     try { chrome.runtime.sendMessage(snapshot()); } catch {}
   }
 
-  chrome.runtime.onMessage.addListener((msg) => {
-    if (msg?.kind === 'WEIRDHOST_REQUEST_STATE') send();
+  chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
+    if (msg?.kind !== 'WEIRDHOST_REQUEST_STATE') return;
+    const state = snapshot();
+    sendResponse(state);
   });
 
   setInterval(send, 4000);

@@ -1,6 +1,6 @@
 {
   "name": "weirdhost-presence",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "Discord Rich Presence companion for Weirdhost",
   "main": "src/main.js",
   "author": "pullgena",
