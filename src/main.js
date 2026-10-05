@@ -121,7 +121,7 @@ function buildActivity(page, settings) {
   if (settings.largeImageKey) {
     activity.assets = {
       large_image: settings.largeImageKey,
-      large_text: settings.largeImageText || 'WeirdHost'
+      large_text: settings.largeImageText || 'weirdhost'
     };
   }
 

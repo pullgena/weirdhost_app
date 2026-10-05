@@ -1,6 +1,6 @@
 # WeirdHost Presence
 
-WeirdHost 웹 패널에서 현재 보고 있는 서버와 메뉴를 Discord Rich Presence로 표시하는 Windows 앱 + Chrome/Edge 확장프로그램입니다.
+WeirdHost 웹 패널에서 현재 보고 있는 서버와 메뉴를 Discord Rich Presence로 표시하는 Windows 앱 + Chrome/Edge/Brave 확장프로그램입니다.
 
 ## 주요 기능
 
@@ -15,7 +15,7 @@ WeirdHost 웹 패널에서 현재 보고 있는 서버와 메뉴를 Discord Rich
 - 앱 UI에서 시작 / 정지 / 종료 / 업데이트 확인
 
 
-## v0.1.2 상태 진단 UI
+## v0.1.3 상태 진단 UI
 
 앱 상단의 `현재 상태` 카드가 단순히 `실행 중`만 표시하지 않고 실제 연결 단계를 진단합니다.
 
@@ -32,7 +32,7 @@ WeirdHost 웹 패널에서 현재 보고 있는 서버와 메뉴를 Discord Rich
 ## 구조
 
 ```text
-Chrome/Edge 확장프로그램
+Chrome/Edge/Brave 확장프로그램
         ↓ 127.0.0.1:32145
 WeirdHost Presence Windows 앱
         ↓ Discord IPC
@@ -88,7 +88,7 @@ git tag v0.2.0
 git push origin main --tags
 ```
 
-GitHub Actions가 자동으로 Windows 설치 파일과 `latest.yml`, 확장프로그램 ZIP을 GitHub Release에 올립니다. 설치된 Windows 앱은 GitHub Release에서 새 버전을 확인하고 자동으로 내려받습니다. 확장프로그램 소스도 앱 설치본의 `resources/extension`에 포함되어 앱 업데이트 때 함께 교체됩니다. Chrome/Edge에서 unpacked 확장프로그램을 쓰는 경우 브라우저 재시작 또는 확장프로그램 새로고침이 필요할 수 있습니다.
+GitHub Actions가 자동으로 Windows 설치 파일과 `latest.yml`, 확장프로그램 ZIP을 GitHub Release에 올립니다. 설치된 Windows 앱은 GitHub Release에서 새 버전을 확인하고 자동으로 내려받습니다. 확장프로그램 소스도 앱 설치본의 `resources/extension`에 포함되어 앱 업데이트 때 함께 교체됩니다. Chrome/Edge/Brave에서 unpacked 확장프로그램을 쓰는 경우 브라우저 재시작 또는 확장프로그램 새로고침이 필요할 수 있습니다.
 
 ## 표시 템플릿
 
@@ -121,8 +121,21 @@ Discord에는 예를 들어 다음과 같이 표시됩니다.
 
 ## 보안 메모
 
-로컬 브리지 서버는 `127.0.0.1`에만 바인딩되고, Chrome/Edge 확장프로그램 출처와 전용 요청 헤더를 확인합니다. 인터넷에 포트를 열지 않습니다.
+로컬 브리지 서버는 `127.0.0.1`에만 바인딩되고, Chrome/Edge/Brave 확장프로그램 출처와 전용 요청 헤더를 확인합니다. 인터넷에 포트를 열지 않습니다.
 
 ## 라이선스
 
 MIT
+
+
+## 기본 Discord 표시 형식
+
+Discord Developer Portal의 애플리케이션 이름은 `weirdhost`로 설정하세요. 기본 표시 문구는 다음과 같습니다.
+
+```text
+weirdhost 시청 중
+서버 이름 : [서버 이름] 에서
+[탭 현황]
+```
+
+기본 템플릿은 `서버 이름 : {server} 에서` / `{section}`이며 앱의 고급 설정에서 변경할 수 있습니다.

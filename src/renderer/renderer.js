@@ -86,7 +86,7 @@ function renderPreview(state, useForm = false) {
     title: page.title || ''
   };
   const typeLabel = ({ 0: '플레이 중', 2: '듣는 중', 3: '시청 중', 5: '경쟁 중' })[Number(s.activityType)] || '시청 중';
-  $('previewType').textContent = `${typeLabel} WeirdHost`;
+  $('previewType').textContent = `weirdhost ${typeLabel}`;
   $('previewDetails').textContent = applyTemplate(s.detailsTemplate, vars) || '—';
   $('previewState').textContent = applyTemplate(s.stateTemplate, vars) || '—';
 }
@@ -133,7 +133,7 @@ function diagnose(state) {
     return {
       level: 'waiting',
       title: '확장프로그램 연결 대기 중',
-      message: 'Chrome/Edge 확장프로그램에서 아직 신호가 오지 않았습니다.',
+      message: 'Chrome/Edge/Brave 확장프로그램에서 아직 신호가 오지 않았습니다.',
       tip: '확장프로그램이 켜져 있는지 확인한 뒤 WeirdHost 탭을 한 번 열거나 전환해 주세요.'
     };
   }
@@ -143,7 +143,7 @@ function diagnose(state) {
       level: 'waiting',
       title: 'WeirdHost 탭을 기다리는 중',
       message: '확장프로그램은 정상 연결됐지만 현재 활성 탭이 WeirdHost가 아닙니다.',
-      tip: 'Chrome/Edge에서 WeirdHost 탭을 클릭해 활성화해 주세요.'
+      tip: 'Chrome/Edge/Brave에서 WeirdHost 탭을 클릭해 활성화해 주세요.'
     };
   }
 
@@ -223,7 +223,7 @@ function applyRecommendedSettings() {
   $('showElapsedTime').checked = true;
   $('launchAtStartup').checked = true;
   $('fallbackServerText').value = 'WeirdHost 서버';
-  $('detailsTemplate').value = '{server}';
+  $('detailsTemplate').value = '서버 이름 : {server} 에서';
   $('stateTemplate').value = '{section}';
   if (currentState) renderPreview(currentState, true);
 }

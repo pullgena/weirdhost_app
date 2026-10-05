@@ -9,7 +9,7 @@ const DEFAULTS = {
   showServerName: true,
   showSection: true,
   showElapsedTime: true,
-  detailsTemplate: '{server}',
+  detailsTemplate: '서버 이름 : {server} 에서',
   stateTemplate: '{section}',
   fallbackServerText: 'WeirdHost 서버',
   sectionLabels: {
@@ -26,10 +26,11 @@ const DEFAULTS = {
     other: '서버 관리 중'
   },
   largeImageKey: '',
-  largeImageText: 'WeirdHost',
+  largeImageText: 'weirdhost',
   autoUpdate: true,
   bridgePort: 32145,
-  staleAfterMs: 15000
+  staleAfterMs: 15000,
+  settingsSchemaVersion: 2
 };
 
 function deepMerge(base, override) {
@@ -57,7 +58,30 @@ class SettingsStore {
   load() {
     try {
       const raw = fs.readFileSync(this.file, 'utf8');
-      return deepMerge(DEFAULTS, JSON.parse(raw));
+      const parsed = JSON.parse(raw);
+      const merged = deepMerge(DEFAULTS, parsed);
+
+      // v0.1.3 기본 Discord 표시 형식으로 1회 마이그레이션합니다.
+      // 사용자가 직접 바꾼 템플릿은 건드리지 않습니다.
+      if (Number(parsed.settingsSchemaVersion || 1) < 2) {
+        if (!parsed.detailsTemplate || parsed.detailsTemplate === '{server}') {
+          merged.detailsTemplate = '서버 이름 : {server} 에서';
+        }
+        if (!parsed.stateTemplate || parsed.stateTemplate === '{section}') {
+          merged.stateTemplate = '{section}';
+        }
+        if (!parsed.largeImageText || parsed.largeImageText === 'WeirdHost') {
+          merged.largeImageText = 'weirdhost';
+        }
+        merged.activityType = 3;
+        merged.settingsSchemaVersion = 2;
+        try {
+          fs.mkdirSync(path.dirname(this.file), { recursive: true });
+          fs.writeFileSync(this.file, JSON.stringify(merged, null, 2), 'utf8');
+        } catch {}
+      }
+
+      return merged;
     } catch {
       return structuredClone(DEFAULTS);
     }
