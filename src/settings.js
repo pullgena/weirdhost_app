@@ -11,7 +11,7 @@ const DEFAULTS = {
   showElapsedTime: true,
   detailsTemplate: '{server}',
   stateTemplate: '{section}',
-  fallbackServerText: 'weirdhost 서버',
+  fallbackServerText: 'WeirdHost',
   sectionLabels: {
     console: '콘솔 확인 중',
     files: '파일 관리 중',
@@ -27,6 +27,7 @@ const DEFAULTS = {
     properties: '서버 설정 확인 중',
     playermanager: '플레이어 관리 중',
     ready: '준비중',
+    home: 'WeirdHost',
     other: '서버 관리 중'
   },
 
@@ -36,7 +37,7 @@ const DEFAULTS = {
   autoUpdate: true,
   bridgePort: 32145,
   staleAfterMs: 15000,
-  settingsSchemaVersion: 6
+  settingsSchemaVersion: 7
 };
 
 function deepMerge(base, override) {
@@ -101,7 +102,17 @@ class SettingsStore {
         merged.settingsSchemaVersion = 6;
       }
 
-      if (Number(parsed.settingsSchemaVersion || 1) < 6) {
+      // v0.1.10: 서버 선택/콘솔은 정확히 `WeirdHost`로 표시합니다.
+      // 이전 기본 fallback만 자동 교체하고, 사용자가 직접 만든 문구는 유지합니다.
+      if (Number(parsed.settingsSchemaVersion || 1) < 7) {
+        if (!parsed.fallbackServerText || parsed.fallbackServerText === 'weirdhost 서버' || parsed.fallbackServerText === 'WeirdHost 서버') {
+          merged.fallbackServerText = 'WeirdHost';
+        }
+        if (!parsed.sectionLabels?.home) merged.sectionLabels.home = 'WeirdHost';
+        merged.settingsSchemaVersion = 7;
+      }
+
+      if (Number(parsed.settingsSchemaVersion || 1) < 7) {
         try {
           fs.mkdirSync(path.dirname(this.file), { recursive: true });
           fs.writeFileSync(this.file, JSON.stringify(merged, null, 2), 'utf8');

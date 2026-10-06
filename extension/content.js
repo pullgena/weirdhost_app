@@ -94,7 +94,8 @@
     if (/^\/server\/[^/]+\/?$/i.test(pathname)) return 'console';
 
     const match = pathname.match(/^\/server\/[^/]+\/([^/]+)(?:\/|$)/i);
-    if (!match) return 'other';
+    // 서버 고유코드가 없는 WeirdHost 페이지(서버 선택 화면 등)는 별도로 구분합니다.
+    if (!match) return 'home';
     const segment = String(match[1] || '').toLowerCase();
 
     for (const [key, route] of ROUTES) {
@@ -104,17 +105,39 @@
   }
 
   function snapshot() {
+    const serverId = serverIdFromLocation();
+    const section = detectSection();
+
+    // 서버 선택 화면으로 돌아오면 직전에 보던 서버 이름을 절대 재사용하지 않습니다.
+    // WeirdHost가 SPA 방식으로 이동해도 이전 서버명이 Discord에 남지 않게 합니다.
+    if (!serverId) {
+      lastGoodServerName = '';
+      return {
+        kind: 'WEIRDHOST_PAGE_STATE',
+        active: true,
+        url: location.href,
+        host: location.host,
+        serverId: '',
+        serverName: '',
+        serverNameReliable: false,
+        serverNameSource: 'none',
+        section,
+        title: document.title,
+        readyState: document.readyState
+      };
+    }
+
     const server = extractServerName();
     return {
       kind: 'WEIRDHOST_PAGE_STATE',
       active: true,
       url: location.href,
       host: location.host,
-      serverId: serverIdFromLocation(),
+      serverId,
       serverName: server.name,
       serverNameReliable: server.reliable,
       serverNameSource: server.source,
-      section: detectSection(),
+      section,
       title: document.title,
       readyState: document.readyState
     };

@@ -13,6 +13,7 @@ const sectionNames = {
   properties: '서버 설정',
   playermanager: '플레이어 관리',
   ready: '준비중',
+  home: '서버 선택',
   other: '기타'
 };
 
@@ -96,8 +97,16 @@ function renderPreview(state, useForm = false) {
   };
   const typeLabel = ({ 0: '플레이 중', 2: '듣는 중', 3: '시청 중', 5: '경쟁 중' })[Number(s.activityType)] || '시청 중';
   $('previewType').textContent = `weirdhost ${typeLabel}`;
-  $('previewDetails').textContent = applyTemplate(s.detailsTemplate, vars) || '—';
-  $('previewState').textContent = applyTemplate(s.stateTemplate, vars) || '—';
+  if (page.section === 'console' || page.section === 'home') {
+    $('previewDetails').textContent = 'WeirdHost';
+    $('previewState').textContent = '—';
+  } else if (page.section === 'ready' && !page.serverId) {
+    $('previewDetails').textContent = 'WeirdHost';
+    $('previewState').textContent = (s.sectionLabels || {}).ready || '준비중';
+  } else {
+    $('previewDetails').textContent = applyTemplate(s.detailsTemplate, vars) || '—';
+    $('previewState').textContent = applyTemplate(s.stateTemplate, vars) || '—';
+  }
 }
 
 function setStatusValue(id, text, tone = 'neutral') {
@@ -240,7 +249,7 @@ function applyRecommendedSettings() {
   $('showSection').checked = true;
   $('showElapsedTime').checked = true;
   $('launchAtStartup').checked = true;
-  $('fallbackServerText').value = 'weirdhost 서버';
+  $('fallbackServerText').value = 'WeirdHost';
   $('detailsTemplate').value = '{server}';
   $('stateTemplate').value = '{section}';
   if (currentState) renderPreview(currentState, true);

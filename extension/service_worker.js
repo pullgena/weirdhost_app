@@ -41,7 +41,10 @@ async function getServerNameCache() {
 async function normalizeServerName(payload) {
   if (!payload?.active) return payload;
   const serverId = String(payload.serverId || serverIdFromUrl(payload.url) || '');
-  if (!serverId) return payload;
+  // 서버 선택 화면 등 /server/<id> 밖에서는 이전 서버 이름을 남기지 않습니다.
+  if (!serverId) {
+    return { ...payload, serverId: '', serverName: '', serverNameReliable: false };
+  }
 
   const cache = await getServerNameCache();
   const cached = cleanName(cache[serverId]);

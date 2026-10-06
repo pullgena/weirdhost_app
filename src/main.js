@@ -99,16 +99,32 @@ function applyTemplate(template, vars) {
 
 function buildActivity(page, settings) {
   const server = settings.showServerName
-    ? (page.serverName || settings.fallbackServerText || 'weirdhost 서버')
-    : (settings.fallbackServerText || 'weirdhost 서버');
-  const section = settings.showSection ? sectionText(page.section, settings) : 'weirdhost 이용 중';
-  const details = applyTemplate(settings.detailsTemplate, { server, section, host: page.host || '', title: page.title || '' });
-  const state = applyTemplate(settings.stateTemplate, { server, section, host: page.host || '', title: page.title || '' });
+    ? (page.serverName || settings.fallbackServerText || 'WeirdHost')
+    : (settings.fallbackServerText || 'WeirdHost');
+  const section = settings.showSection ? sectionText(page.section, settings) : 'WeirdHost 이용 중';
 
+  let details = applyTemplate(settings.detailsTemplate, { server, section, host: page.host || '', title: page.title || '' });
+  let state = applyTemplate(settings.stateTemplate, { server, section, host: page.host || '', title: page.title || '' });
+
+  // 표기 규칙:
+  // - Discord 활동 이름: `weirdhost ...` (소문자, 사용자가 지정한 표기)
+  // - 서버 선택 화면 및 서버 콘솔 카드 본문: `WeirdHost` (W/H 대문자)
+  // 콘솔에서 서버 선택 화면으로 돌아왔을 때 이전 서버명/메뉴가 남지 않도록 강제로 초기화합니다.
+  if (page.section === 'console' || page.section === 'home') {
+    details = 'WeirdHost';
+    state = '';
+  } else if (page.section === 'ready' && !page.serverId) {
+    details = 'WeirdHost';
+    state = sectionText('ready', settings);
+  }
+
+  const typeLabel = activityTypeName(settings.activityType);
   const activity = {
-    // Discord 2026 Social SDK/Rich Presence의 표시 이름 필드.
-    // 레거시 RPC 클라이언트에서 무시될 경우 Developer Portal의 애플리케이션 이름이 사용됩니다.
-    name: 'weirdhost',
+    // 친구/멤버 목록의 작은 활동 표시에도 상태 종류가 보이도록
+    // 활동 이름 자체에 '시청 중', '플레이 중' 등의 문구를 포함합니다.
+    // Discord 클라이언트가 name을 애플리케이션 이름으로 고정하는 경우에는
+    // Developer Portal의 애플리케이션 이름이 우선될 수 있습니다.
+    name: `weirdhost ${typeLabel}`,
     type: Number(settings.activityType),
     details: details || undefined,
     state: state || undefined,
