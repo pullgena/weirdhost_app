@@ -39,6 +39,7 @@ function renderSectionInputs(labels = {}) {
 function fillSettings(s) {
   $('clientId').value = s.discordApplicationId || '';
   $('activityType').value = String(s.activityType ?? 3);
+  $('activityNameTemplate').value = s.activityNameTemplate || 'weirdhost {type}';
   $('fallbackServerText').value = s.fallbackServerText || '';
   $('detailsTemplate').value = s.detailsTemplate || '';
   $('stateTemplate').value = s.stateTemplate || '';
@@ -56,6 +57,7 @@ function collectSettings() {
   return {
     discordApplicationId: $('clientId').value.replace(/\D/g, ''),
     activityType: Number($('activityType').value),
+    activityNameTemplate: $('activityNameTemplate').value.trim() || 'weirdhost {type}',
     fallbackServerText: $('fallbackServerText').value.trim(),
     detailsTemplate: $('detailsTemplate').value.trim(),
     stateTemplate: $('stateTemplate').value.trim(),
@@ -96,7 +98,10 @@ function renderPreview(state, useForm = false) {
     title: page.title || ''
   };
   const typeLabel = ({ 0: '플레이 중', 2: '듣는 중', 3: '시청 중', 5: '경쟁 중' })[Number(s.activityType)] || '시청 중';
-  $('previewType').textContent = `weirdhost ${typeLabel}`;
+  const activityName = String(s.activityNameTemplate || 'weirdhost {type}')
+    .replaceAll('{type}', typeLabel)
+    .trim() || 'weirdhost';
+  $('previewType').textContent = activityName;
   if (page.section === 'console' || page.section === 'home') {
     $('previewDetails').textContent = 'WeirdHost';
     $('previewState').textContent = '—';
@@ -245,6 +250,7 @@ function render(state, first = false) {
 
 function applyRecommendedSettings() {
   $('activityType').value = '3';
+  $('activityNameTemplate').value = 'weirdhost {type}';
   $('showServerName').checked = true;
   $('showSection').checked = true;
   $('showElapsedTime').checked = true;
@@ -257,7 +263,7 @@ function applyRecommendedSettings() {
 
 function bindLivePreview() {
   const ids = [
-    'activityType', 'fallbackServerText', 'detailsTemplate', 'stateTemplate',
+    'activityType', 'activityNameTemplate', 'fallbackServerText', 'detailsTemplate', 'stateTemplate',
     'showServerName', 'showSection', 'showElapsedTime'
   ];
   ids.forEach((id) => {

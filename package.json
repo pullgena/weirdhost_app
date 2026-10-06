@@ -1,6 +1,6 @@
 {
   "name": "weirdhost-presence",
-  "version": "0.1.10",
+  "version": "0.1.12",
   "description": "Discord Rich Presence companion for Weirdhost",
   "main": "src/main.js",
   "author": "pullgena",
@@ -13,7 +13,6 @@
     "check": "node --check src/main.js && node --check src/discord-ipc.js && node --check src/bridge-server.js && node --check src/settings.js && node --check src/preload.js && node --check src/renderer/renderer.js && node --check extension/service_worker.js && node --check extension/content.js && node --check extension/popup.js"
   },
   "dependencies": {
-    "electron-log": "5.4.3",
     "electron-updater": "6.8.9"
   },
   "devDependencies": {
@@ -37,8 +36,8 @@
         "to": "extension"
       },
       {
-        "from": "discord-assets",
-        "to": "discord-assets"
+        "from": "src/assets/weirdhost.png",
+        "to": "discord-assets/weirdhost.png"
       }
     ],
     "win": {
@@ -67,6 +66,11 @@
         "repo": "weirdhost_app",
         "releaseType": "release"
       }
+    ],
+    "compression": "maximum",
+    "electronLanguages": [
+      "en-US",
+      "ko"
     ]
   }
 }

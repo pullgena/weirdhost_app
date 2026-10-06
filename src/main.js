@@ -1,6 +1,5 @@
 const path = require('path');
 const { app, BrowserWindow, Tray, Menu, ipcMain, nativeImage, Notification, shell } = require('electron');
-const log = require('electron-log');
 const { autoUpdater } = require('electron-updater');
 const { SettingsStore } = require('./settings');
 const { BridgeServer } = require('./bridge-server');
@@ -20,7 +19,7 @@ let discordState = { connected: false, message: '연결 대기 중', level: 'wai
 let bridgeState = { listening: false, message: '브리지 시작 대기 중' };
 
 function trayIcon() {
-  const iconPath = path.join(__dirname, 'assets', 'icon.png');
+  const iconPath = path.join(__dirname, 'assets', 'weirdhost.png');
   const image = nativeImage.createFromPath(iconPath);
   return image.isEmpty() ? nativeImage.createEmpty() : image.resize({ width: 24, height: 24 });
 }
@@ -33,7 +32,7 @@ function createWindow() {
     minHeight: 620,
     show: false,
     title: 'weirdhost Presence',
-    icon: path.join(__dirname, 'assets', 'icon.png'),
+    icon: path.join(__dirname, 'assets', 'weirdhost.png'),
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
@@ -119,12 +118,14 @@ function buildActivity(page, settings) {
   }
 
   const typeLabel = activityTypeName(settings.activityType);
+  const activityName = String(settings.activityNameTemplate || 'weirdhost {type}')
+    .replaceAll('{type}', typeLabel)
+    .trim()
+    .slice(0, 128) || 'weirdhost';
   const activity = {
-    // 친구/멤버 목록의 작은 활동 표시에도 상태 종류가 보이도록
-    // 활동 이름 자체에 '시청 중', '플레이 중' 등의 문구를 포함합니다.
-    // Discord 클라이언트가 name을 애플리케이션 이름으로 고정하는 경우에는
-    // Developer Portal의 애플리케이션 이름이 우선될 수 있습니다.
-    name: `weirdhost ${typeLabel}`,
+    // Discord 카드 맨 위의 활동 이름은 프로그램 설정에서 직접 변경할 수 있습니다.
+    // {type}을 넣으면 현재 활동 종류(시청 중/플레이 중/듣는 중/경쟁 중)가 자동으로 들어갑니다.
+    name: activityName,
     type: Number(settings.activityType),
     details: details || undefined,
     state: state || undefined,
@@ -233,7 +234,7 @@ function broadcastState() {
 }
 
 function setupUpdater() {
-  autoUpdater.logger = log;
+  autoUpdater.logger = console;
   autoUpdater.autoDownload = true;
   autoUpdater.autoInstallOnAppQuit = true;
 
@@ -347,7 +348,7 @@ function registerIpc() {
   ipcMain.handle('app:open-discord-assets-folder', async () => {
     const assetsPath = app.isPackaged
       ? path.join(process.resourcesPath, 'discord-assets')
-      : path.join(__dirname, '..', 'discord-assets');
+      : path.join(__dirname, 'assets');
     await shell.openPath(assetsPath);
     return assetsPath;
   });
@@ -374,7 +375,7 @@ app.whenReady().then(async () => {
     bridgeState = { listening: true, message: `로컬 브리지 ${store.get().bridgePort} 포트 정상` };
   } catch (error) {
     bridgeState = { listening: false, message: `로컬 브리지 시작 실패: ${error.message}` };
-    log.error('Bridge start failed', error);
+    console.error('Bridge start failed:', error.message);
   }
 
   createWindow();

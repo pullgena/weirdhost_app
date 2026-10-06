@@ -50,7 +50,7 @@
       <article class="card preview-card">
         <h2>Discord 미리보기</h2>
         <div class="discord-preview">
-          <div class="fake-avatar"><img src="../assets/icon.png" alt="weirdhost 아이콘" /></div>
+          <div class="fake-avatar"><img src="../assets/weirdhost.png" alt="weirdhost 아이콘" /></div>
           <div class="preview-copy">
             <strong id="previewType">weirdhost 시청 중</strong>
             <div id="previewDetails">weirdhost 서버</div>
@@ -89,11 +89,15 @@
           <div class="step-body">
             <label>Discord에 어떻게 표시할까요?
               <select id="activityType">
-                <option value="3">weirdhost 시청 중 (추천)</option>
-                <option value="0">weirdhost 플레이 중</option>
-                <option value="2">weirdhost 듣는 중</option>
-                <option value="5">weirdhost 경쟁 중</option>
+                <option value="3">시청 중 (추천)</option>
+                <option value="0">플레이 중</option>
+                <option value="2">듣는 중</option>
+                <option value="5">경쟁 중</option>
               </select>
+            </label>
+            <label class="activity-name-field">맨 위 활동 이름
+              <input id="activityNameTemplate" placeholder="weirdhost {type}" maxlength="128" />
+              <small><b>{type}</b> = 시청 중/플레이 중 등으로 자동 변경됩니다. 중복이 싫으면 <b>weirdhost</b>만 입력하세요.</small>
             </label>
           </div>
         </div>
@@ -168,7 +172,7 @@
             <div></div>
             <div class="branding-help">
               <div class="field-title">Discord 카드 이름 / 아이콘</div>
-              <small>빨간 부분 이름은 <b>weirdhost</b>, 큰 이미지는 Discord 애플리케이션 아이콘을 사용합니다.</small>
+              <small>맨 위 활동 이름은 간단 설정에서 직접 바꿀 수 있고, 큰 이미지는 Discord 애플리케이션 아이콘을 사용합니다.</small>
               <div class="update-row">
                 <button type="button" id="openDiscordAssetsBtn">위어드호스트 아이콘 파일 열기</button>
                 <button type="button" id="openDiscordPortalBrandingBtn">Discord Developer Portal 열기</button>

@@ -64,9 +64,6 @@ class BridgeServer extends EventEmitter {
     if (!this.allowedOrigin(origin)) return this.sendJson(res, 403, { ok: false, error: 'origin_denied' });
     if (req.method === 'OPTIONS') return this.sendJson(res, 204, {});
 
-    if (req.method === 'GET' && req.url === '/status') {
-      return this.sendJson(res, 200, { ok: true, lastSeenAt: this.lastSeenAt, latest: this.latest });
-    }
 
     if (req.method === 'POST' && req.url === '/activity') {
       if (req.headers['x-weirdhost-bridge'] !== 'v1') {

@@ -131,3 +131,7 @@ input[type="checkbox"] { width:18px; height:18px; accent-color:var(--accent); }
   display: block;
   object-fit: cover;
 }
+
+/* v0.1.11 customizable Discord activity name */
+.activity-name-field { margin-top: 12px; }
+.activity-name-field small { line-height: 1.45; }

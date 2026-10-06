@@ -1,5 +1,4 @@
 const APP_URL = 'http://127.0.0.1:32145';
-let lastPayload = { active: false };
 let lastWeirdHostTabId = null;
 const pageStates = new Map();
 let refreshTimer = null;
@@ -67,7 +66,6 @@ async function normalizeServerName(payload) {
 
 async function sendToApp(payload) {
   const normalized = await normalizeServerName(payload);
-  lastPayload = normalized;
   try {
     await fetch(`${APP_URL}/activity`, {
       method: 'POST',
@@ -78,7 +76,7 @@ async function sendToApp(payload) {
       body: JSON.stringify(normalized),
       cache: 'no-store'
     });
-    await chrome.storage.local.set({ appConnected: true, lastSentAt: Date.now(), lastPayload: normalized });
+    await chrome.storage.local.set({ appConnected: true, lastPayload: normalized });
   } catch {
     await chrome.storage.local.set({ appConnected: false, lastPayload: normalized });
   }

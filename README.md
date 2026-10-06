@@ -195,7 +195,18 @@ Discord 카드의 맨 위 활동 이름은 `weirdhost`를 사용하도록 활동
 Discord의 작은 활동 표시에서도 활동 종류가 보이도록 Rich Presence의 `name`을 `weirdhost 시청 중`, `weirdhost 플레이 중`, `weirdhost 듣는 중`, `weirdhost 경쟁 중` 형태로 전송합니다. Discord 클라이언트가 애플리케이션 이름을 고정해서 표시하는 경우 Developer Portal의 앱 이름이 우선될 수 있습니다.
 
 
-## v0.1.10
+## v0.1.12
 - 서버 선택 화면으로 돌아오면 이전 서버 정보를 즉시 초기화합니다.
 - 서버 콘솔과 서버 선택 화면의 카드 본문은 정확히 `WeirdHost`로만 표시합니다.
 - 활동 이름의 브랜드 표기는 기존 규칙대로 소문자 `weirdhost`를 유지합니다.
+
+
+## v0.1.12 최적화
+
+- 사용하지 않는 `electron-log` 의존성 제거
+- 중복 PNG 자산을 하나로 통합
+- 사용하지 않는 브리지 `/status` API 제거
+- 폐기된 Rich Presence 이미지 설정 키 제거 및 설정 파일 자동 정리
+- Electron 로케일을 `ko`, `en-US`만 포함하도록 제한
+- Windows 빌드 압축을 `maximum`으로 설정
+- 확장프로그램의 불필요한 메모리/스토리지 필드 제거
